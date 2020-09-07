@@ -1,7 +1,0 @@
-aruco_ros/aruco
-/home/abdel/catkin_ws/devel/.private/aruco/cmake.lock /home/abdel/catkin_ws/devel/./cmake.lock
-/home/abdel/catkin_ws/devel/.private/aruco/share/aruco/cmake/arucoConfig-version.cmake /home/abdel/catkin_ws/devel/share/aruco/cmake/arucoConfig-version.cmake
-/home/abdel/catkin_ws/devel/.private/aruco/share/aruco/cmake/arucoConfig.cmake /home/abdel/catkin_ws/devel/share/aruco/cmake/arucoConfig.cmake
-/home/abdel/catkin_ws/devel/.private/aruco/lib/libaruco.so /home/abdel/catkin_ws/devel/lib/libaruco.so
-/home/abdel/catkin_ws/devel/.private/aruco/lib/aruco/optimalmarkers /home/abdel/catkin_ws/devel/lib/aruco/optimalmarkers
-/home/abdel/catkin_ws/devel/.private/aruco/lib/pkgconfig/aruco.pc /home/abdel/catkin_ws/devel/lib/pkgconfig/aruco.pc

@@ -1,5 +1,0 @@
-robotic_3d
-/home/abdel/catkin_ws/devel/.private/robotic_3d/cmake.lock /home/abdel/catkin_ws/devel/./cmake.lock
-/home/abdel/catkin_ws/devel/.private/robotic_3d/share/robotic_3d/cmake/robotic_3dConfig-version.cmake /home/abdel/catkin_ws/devel/share/robotic_3d/cmake/robotic_3dConfig-version.cmake
-/home/abdel/catkin_ws/devel/.private/robotic_3d/share/robotic_3d/cmake/robotic_3dConfig.cmake /home/abdel/catkin_ws/devel/share/robotic_3d/cmake/robotic_3dConfig.cmake
-/home/abdel/catkin_ws/devel/.private/robotic_3d/lib/pkgconfig/robotic_3d.pc /home/abdel/catkin_ws/devel/lib/pkgconfig/robotic_3d.pc
