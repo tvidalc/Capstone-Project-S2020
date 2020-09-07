@@ -1,0 +1,33 @@
+A ROS-wrapper for Bhoram Lee's GPisMap
+
+The ROS package processes depth images from the ROS topic 
+         "/sensor_d435_front/depth/image_rect_raw". 
+
+It listens to two TF's to perform camera to world transform: "camera_depth_frame_front" to "map". 
+
+The final output is a mesh file of the scene, covering space expressed in following matlab equivalent meshgrid definition.
+    [xg, yg, zg ] = meshgrid( -0.5:0.02:1.5, -4.5:0.02:-2.5, -0.1:0.02:0.7 );
+
+Please modify the image and TF names for different camera source, and change meshgrid definition for different scene setting.
+
+To evaluate the ROS package, download a sample ROS bag at:
+
+https://drive.google.com/open?id=1UwJbcTbjOckFaDoLaNXfEE1EI88kIkfW
+
+1. run pre-recorded ROS-bag 
+$ rosbag play 2020-04-17-22-51-55.bag -r 0.2
+
+2. run GPisMap3
+$ rosrun gpismp_ros gpismap3
+
+3. trigger ONE mesh generation with ros service call
+$ rosservice call /srv_mapper_update "{}"
+
+4. check path <gpismap_ros>/mesh
+There should be newly generated files with name pattern: pile_%02d.ply
+
+5. To visualize generated mesh and/or cloud
+$ roscd gpismap_ros
+$ rosrun rviz rviz config/gpismap.rviz
+
+
