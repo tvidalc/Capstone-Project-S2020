@@ -3,10 +3,7 @@
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit_msgs/DisplayRobotState.h>
-//#include <geometry_msgs.h>
 #include <moveit_msgs/DisplayTrajectory.h>
-//#include <planning_environment/util/construct_object.h>
-
 #include <visualization_msgs/Marker.h>
 #include <tf/transform_datatypes.h>
 #include <vector>
@@ -26,10 +23,7 @@ int main(int argc, char **argv)
   moveit::planning_interface::MoveGroup move_group("manipulator");
   move_group.setPoseReferenceFrame("world");
 //  move_group.setNamedTarget("posDown");
-
-
-  // objects 
- // moveit::planning_interface::PlanningSceneInterface planning_scene_interface;  
+ 
   ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 0, true);
   moveit_msgs::DisplayTrajectory display_trajectory;
   moveit::planning_interface::MoveGroup::Plan my_plan;
@@ -96,14 +90,6 @@ geometry_msgs::Pose target_pose1 = move_group.getCurrentPose().pose;
 std::vector<geometry_msgs::Pose> waypoints;
 waypoints.push_back(target_pose1);
 
-/*
-  tf::Quaternion q_tf = tf::createQuaternionFromRPY(0.3, 0.0, 0.0);
-target_pose1.orientation.x = q_tf[0];
-target_pose1.orientation.y = q_tf[1];
-target_pose1.orientation.z = q_tf[2];
-target_pose1.orientation.w = q_tf[3];
-
-waypoints.push_back(target_pose1); */
 
 c_x = 0.3;
 for(double i = 0; i < c_x; i += c_x/2) {
@@ -113,15 +99,10 @@ waypoints.push_back(target_pose1);
 
 }
 
-//target_pose1.position.x += 0.3;
-//target_pose1.position.y -= 0.2;
-//waypoints.push_back(target_pose1);
 
 //planning
 double fraction = move_group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
 ROS_INFO("Visualizing plan (Cartesian path) (%.2f%% acheived)", fraction * 100.0);
-
-//sleep(0.5);
 
 
 for (std::vector<geometry_msgs::Pose>::iterator it = waypoints.begin(); it != waypoints.end(); it++)
@@ -132,12 +113,6 @@ move_group.setPoseTarget(*it);
 //move_group.clearPoseTarget();
 move_group.move();
 } 
-//move_group.clearPoseTargets();
-
-//move_group.setPoseTargets(waypoints);
-//move_group.move();
-
-
 
 
 waypoints.clear();
@@ -172,7 +147,6 @@ move_group.move();
 } 
 
 waypoints.clear();
-//target_pose.pose.clear()
 target_pose = move_group.getCurrentPose().pose;
 waypoints.push_back(target_pose);
 
@@ -208,8 +182,6 @@ waypoints.push_back(target_pose);
 
 }
 
-//target_pose.position.y += 0.2;
-//waypoints.push_back(target_pose);
 
  fraction = move_group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
  ROS_INFO("Visualizing plan (Cartesian path) (%.2f%% acheived)", fraction * 100.0);
@@ -226,15 +198,7 @@ move_group.move();
 
 }
 
-//execution
-//if (fraction > 0.95) move_group.move();
-
-//move_group.execute(my_plan);
-
-
-
-
-  //ros::shutdown();
+//ros::shutdown();
 spinner.stop();  
   return 0;
 }
