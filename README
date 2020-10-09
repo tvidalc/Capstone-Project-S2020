@@ -20,11 +20,11 @@ Usage:
 
     $ rosrun gpismap_ros gpismap3 _command:=panel   or   rosrun gpismap_ros gpismap3 _command:=object
     
-4. perform a service call to start algorithm and robot server
+4. Perform a service call to start algorithm and robot server
 
     $ rosservice call /srv_mapper_update "{}"
     
-5. allow system to run and auto terminate else for any issues hit ctrl-z on all terminals to cancel processes
+5. Allow system to run and auto terminate else for any issues hit ctrl-z on all terminals to cancel processes
     
     results can be viewed from the /mesh sub directory of gpismap_ros package
     
