@@ -25,6 +25,8 @@ Usage:
     $ rosservice call /srv_mapper_update "{}"
     
 5. allow system to run and auto terminate else for any issues hit ctrl-z on all terminals to cancel processes
-
+    
+    results can be viewed from the /mesh sub directory of gpismap_ros package
+    
 
 Note: All commands must be entered in a new terminal 
