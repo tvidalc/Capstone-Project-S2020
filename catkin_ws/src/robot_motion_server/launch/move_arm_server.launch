@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+    <node pkg="robot_motion_server" type="move_arm_server" name="move_arm_server" output="screen" >
+    </node>
+
+</launch>

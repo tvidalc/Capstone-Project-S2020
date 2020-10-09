@@ -1,6 +1,8 @@
 //
 // Created by liyang on 1/13/20.
 //
+// Edited by Abdel Saeed 09/10/2020
+//
 
 #include <gpis_ros/gp_mapper.h>
 #include <ros/ros.h>
@@ -9,6 +11,11 @@
 #include <pcl/point_cloud.h>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/voxel_grid_covariance.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/point_types.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl_ros/point_cloud.h>
 #include <depth_image_proc/depth_traits.h>
 #include <ros/package.h>
 #include <tf/tf.h>
@@ -20,6 +27,7 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <std_msgs/String.h>
+#include <thread>
 
 namespace isosurface
 {
@@ -73,6 +81,16 @@ namespace gpis_ros
     , m_it(nh)
     , m_tf2Listener(m_tf2Buffer)
     , m_should_receive_depth( false )
+    , m_cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>)
+    , client_("move_arm", true)
+    , success(false)
+    , finished_within_time(false)
+    , Tp(1)
+    , Bt(2)
+    , Ft(3)
+    , Bk(4)
+    , Rt(5)
+    , Lt(6)
     {
 
         image_transport::TransportHints hints("raw", ros::TransportHints(), nh);
@@ -85,8 +103,11 @@ namespace gpis_ros
 
         m_trigger_svc = nh.advertiseService( "srv_mapper_update", &GPMapper::setEnablerSwitch, this ); 
 
-	//m_pub = nh.advertise < std_msgs::String > ("sv_mapper",1);
-        //m_sub = nh.subscribe( "/sv_mapper", 1, &GPMapper::setEnabler, this);
+        m_position = m_nh.advertise<pcl::PointCloud<pcl::PointXYZ>> ("position", 2);
+
+
+
+        m_pnh.param<std::string>("command", command, "panel");
 
     }
 
@@ -104,9 +125,9 @@ namespace gpis_ros
         pose_ptr.resize( 12 );
 
         // generate mesh grid * Smaller increments makes it more defined but more points X*Y*Z which takes longer to process
-        x_range = matlab::RangeInfo<float>( -0.3, 0.01, 0.3 );
-        y_range = matlab::RangeInfo<float>( 0.0, 0.01, 0.9 );
-        z_range = matlab::RangeInfo<float>( 0.052, 0.01, 0.4 );
+        x_range = matlab::RangeInfo<float> ( -0.28, 0.06, 0.28 ); //0.006
+        y_range = matlab::RangeInfo<float> ( 0.28, 0.06, 0.85 );
+        z_range = matlab::RangeInfo<float> ( 0.05, 0.06, 0.6 );
 
         x_samples = matlab::colonRange<float>( x_range.begin, x_range.inc, x_range.end );
         y_samples = matlab::colonRange<float>( y_range.begin, y_range.inc, y_range.end );
@@ -139,8 +160,8 @@ namespace gpis_ros
         m_isoinfo.range_st[2] = z_range.begin;
         m_isoinfo.N_mesh = X * Y * Z;       // number of points in mesh
 
-	//CHECK
-	ROS_INFO_STREAM("Checking N_mesh Points: " << m_isoinfo.N_mesh );
+	    //CHECK
+	    ROS_INFO_STREAM("Checking N_mesh Points: " << m_isoinfo.N_mesh );
 
         // set pose_ptr in the format GPisMap3 expects
         ROS_INFO_STREAM("GPMapper::resetMap :> set robot Pose");
@@ -165,7 +186,7 @@ namespace gpis_ros
         // transform manipulability bounding box from arm_base frame to map frame
 
         m_cloud.reset(new pcl::PointCloud<pcl::PointXYZ>());
-
+    
     }
 
     bool
@@ -176,8 +197,6 @@ namespace gpis_ros
             local_transformStamped = m_tf2Buffer.lookupTransform("base_link", "camera_link",
                                                                  ros::Time(0) );
             //m_transformStamped = local_transformStamped; 
-
-	//ROS_INFO_STREAM("Checking Transform: " << local_transformStamped.transform);
 
             tf::transformMsgToTF( local_transformStamped.transform, tran );
             return true;
@@ -194,17 +213,131 @@ namespace gpis_ros
         ROS_INFO_STREAM("GP_mapper enabled" );
         m_should_receive_depth = true;
 
+        // connection to server for robot control
+        ROS_INFO("Waiting for server");
+        client_.waitForServer();
+        ROS_INFO("Connected to server");
+
         return true;
     }
 
- /* void
-    GPMapper::setEnabler( const std_msgs::String& message )
-    {
-        ROS_INFO_STREAM("GP_mapper enabled" );
-        m_should_receive_depth = true;
 
-        //return true;
-    } */
+    void GPMapper::getarrayindex(int pos, int length, int &value1, int &value2, int &value3)
+    {
+        int temp = 0;
+        int row = length/3;
+        int i,j,k;
+
+        for(k = 0; k<row; k++){
+        for(j = 0; j<row; j++){
+        for(i = 0; i<row; i++){
+            if(temp == pos){
+                break;
+            }
+            temp = temp + 1;
+        }  }   }
+
+        value1 = i;
+        value2 = k;
+        value3 = j;
+    }
+
+
+    int GPMapper::getvectorindex(int i, int j, int k)
+    {
+    int temp = 0;
+    for(int temp1 = 0; i<i; temp1++){
+     for(int temp2 = 0; i<j; temp2++){
+     for(int temp3 = 0; i<k; temp3++){
+        
+        temp = temp + 1;
+    }   }    }
+    
+    return temp;
+}
+
+
+    int GPMapper::getfacepos(int pos, int length, int face)
+    {
+        int value1, value2, value3;
+
+        getarrayindex(pos, length, value1, value2, value3);
+
+        int v = 0;
+        switch (face) {
+    case 1:               //tp
+        if(value2 == 0){
+            v = 0;
+        }else{
+        v = getvectorindex(value1, value2 - 1, value3);
+        }
+        break;
+    case 2:               //btm
+        try{
+        v = getvectorindex(value1, value2 + 1, value3);
+        }catch(...){
+            v = 0;
+        }
+        
+        break;
+    case 3:               //fnt
+        if(value1 == 0 ){
+            v = 0;
+        }else{
+        v = getvectorindex(value1 - 1, value2, value3);
+        }
+        break;
+    case 4:               //bck
+        try{
+        v = getvectorindex(value1 + 1, value2, value3);
+        }catch(...){
+            v = 0;
+        }
+        break;
+    case 5:               //rght
+        if(value3 = 0){
+            v = 0;
+        }else{
+        v = getvectorindex(value1, value2, value3 - 1);
+        }
+        break;
+    case 6:               // lft
+        try{
+        v = getvectorindex(value1, value2, value3 + 1);
+        }catch(...){
+            v = 0;
+        }
+        break;
+            return v;
+        }
+
+    }
+
+
+    float GPMapper::getGradient(float var, float top, float bottom, float front, float back, float left, float right)
+    {
+        float dx = left - right;
+        float dy = top - bottom;
+        float dz = front - back;
+        return sqrt(pow(dx, 2.0) + pow(dy, 2.0)  + pow(dz, 2.0)); 
+        
+    }
+
+
+    pcl::PointXYZ GPMapper::findMax(std::vector<float> util)
+    {
+
+        std::vector<float>::iterator it;
+        it = std::max_element(util.begin(), util.end());
+
+        pcl::PointXYZ point;
+        point = m_cloud_filtered->points[*it];
+
+        return point;
+                
+    } 
+
+
 
     void
     GPMapper::depthImageCallback(const sensor_msgs::ImageConstPtr& depth_msg,
@@ -213,11 +346,13 @@ namespace gpis_ros
         static int gp_cnt = -1;
 
         // check if enabled
-        if ( !m_should_receive_depth ) {
+        if ( !m_should_receive_depth) {
             return;
         }
 
+
         ++gp_cnt;
+        
 
         ROS_INFO_STREAM("depthImageCallback[" << gp_cnt << "]=> Received a new depth image message (frame = '" << depth_msg->header.frame_id
                          << "', encoding='" << depth_msg->encoding << "')" << "image size: " << depth_msg->height<<" "<< depth_msg->width);
@@ -306,8 +441,94 @@ namespace gpis_ros
 
         publishOutputs( depth_msg->header, m_mesh_fbase );
 
+        // Downsample cloud and Voxelise
+        pcl::VoxelGrid<pcl::PointXYZ> sor;    
 
-       // m_should_receive_depth = false;
+        sor.setInputCloud(m_cloud); // wants a pointer to the cloud 
+        sor.setLeafSize(0.01f, 0.01f, 0.01f); 
+        sor.filter(*m_cloud_filtered);
+
+        std::vector<float> surface(m_cloud_filtered->points.size()*3, 0);
+        int N_surface = m_cloud_filtered->points.size();
+        std::vector<float> surfaceRes(N_surface*8, 0);               // [ no. of point clouds * 8 ] to store z, normals, variance, and var normals
+        m_gpm.test(surface.data(), 3, N_surface, surfaceRes.data()); // takes in pointcloud size X*Y*Z and returns data
+
+        // surfaceRes returned contains 8 elements
+        // 0 = distance, 1,2,3 = surface normals, 4 = variance, 5,6,7 = variance normals
+
+        std::vector<float> var(N_surface, 0);
+        std::vector<float> utility(N_surface,0);
+        float beta_1 = 0.5;
+        float beta_2 = 0.5;
+        std::vector<float> gradient(N_surface, 0);
+
+
+        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;          // method for finding nearest random points - not implemented
+        kdtree.setInputCloud(m_cloud_filtered);
+        pcl::PointXYZ searchPoint;
+        int k = 6;
+
+        for (int i = 0; i < N_surface; i++)
+        {
+            int k8 = i*8;
+            var[i] = surfaceRes[k8+4];
+
+            if (i > 2500 || i < 500)  // print variance for first 500 points and last 500 to check if they are all the same value
+            std::cout << "Variance " << i << " : " << var[i] << std::endl;
+
+/*
+        int tp_idx = getfacepos(i, N_surface, Tp);
+        float Top = var[tp_idx]; 
+
+        int btm_idx = getfacepos(i, N_surface, Bt);
+        float Bottom = var[btm_idx]; 
+
+        int ft_idx = getfacepos(i, N_surface, Ft);
+        float Front = var[ft_idx];
+
+        int bk_idx = getfacepos(i, N_surface, Bk);
+        float Back = var[bk_idx];
+        
+        int lt_idx = getfacepos(i, N_surface, Lt);
+        float Left = var[lt_idx];
+
+        int rt_idx = getfacepos(i, N_surface, Rt);
+        float Right = var[rt_idx];   */
+
+        /*std::vector<pcl::PointXYZ> six_neighbours(6,0);
+
+        six_neighbours.push_back(m_cloud_filtered->points[tp_idx]; */
+        
+        //gradient[i] = getGradient(var[i], Top, Bottom, Front, Back, Left, Right);  
+
+
+        //utility[i] = beta_1 * var[i] + beta_2 * gradient[i];   
+        
+
+        }
+
+
+
+        int cnt = gp_cnt;
+
+        if(gp_cnt < 10)
+        publishPosition(findMax(utility), cnt);
+
+        //std::cout << "Point From Utility Function: \nx = " << pt.x << ", y = " << pt.y << ", z = " << pt.z << std::endl;
+        
+        std::cout << "m_cloud size: " << m_cloud->points.size() << std::endl;
+        std::cout << "m_cloud_filtered size: " << m_cloud_filtered->points.size() << std::endl;
+        
+        
+        if(gp_cnt == 1 && command == "panel")
+        m_should_receive_depth = false;
+        
+
+        if(gp_cnt == 9 && command == "object")
+        m_should_receive_depth = false;
+
+   
+
     }
 
 
@@ -358,6 +579,139 @@ namespace gpis_ros
         publishMesh( header, fbasename );
     }
 
+
+    void GPMapper::publishPosition( pcl::PointXYZ point, int cnt){
+
+        //pcl::PointXYZ pt = point;
+        std::cout << "\nPoint From Utility Function: \nx = " << point.x << ", y = " << point.y << ", z = " << point.z << std::endl;
+
+        pcl::PointCloud<pcl::PointXYZ>::Ptr msg(new pcl::PointCloud<pcl::PointXYZ>);
+        msg->clear();
+        msg->height = 1;
+        msg->width = 1;
+        msg->points.push_back(point);
+        pcl_conversions::toPCL(ros::Time::now(), msg->header.stamp);
+
+        m_position.publish(msg);        // publish point as ros msg for robot control using publisher/subscriber
+
+
+        // method of controlling robot using action server
+
+        // goal.command = "RESET"; //nothing is implemented in here
+        goal.command = "GTP";                   //Go to Pose command
+
+        if(command == "object")
+        goal.target_pose = getPose(cnt);
+
+        else
+        {
+        goal.target_pose = getPose(0);
+        }
+        
+
+
+    if (m_should_receive_depth)
+    {
+        client_.sendGoal(goal);
+        finished_within_time = client_.waitForResult(ros::Duration(20.0));
+        if (!finished_within_time)
+        {
+            ROS_INFO("Timed out !!!");
+        }
+        else
+        {
+           actionlib::SimpleClientGoalState state = client_.getState();
+           success = (state == actionlib::SimpleClientGoalState::SUCCEEDED);
+           if (success)
+                ROS_INFO("Action finished: %s", state.toString().c_str());
+           else
+                ROS_INFO("Action failed: %s", state.toString().c_str());
+        }
+    }
+
+        
+    }
+
+
+    geometry_msgs::Pose GPMapper::getPose(int cnt)
+    {
+        target_pose .orientation = tf::createQuaternionMsgFromRollPitchYaw(1.55, 0.0, 1.1);
+        if (cnt == 0){
+            target_pose.position.x = 0.10;
+            target_pose.position.y = 0.57;
+            target_pose.position.z = 1.67;
+        }
+        else if (cnt == 1){
+            target_pose .orientation = tf::createQuaternionMsgFromRollPitchYaw(2.0, -0.635, -0.69);
+            target_pose.position.x = -0.48;
+            target_pose.position.y = 0.52;
+            target_pose.position.z = 1.4;
+        }
+
+        else if (cnt == 2){
+            target_pose .orientation = tf::createQuaternionMsgFromRollPitchYaw(1.55, 0.0, 1.1);
+            target_pose.position.x = -0.05;
+            target_pose.position.y = 0.60;
+            target_pose.position.z = 1.67;
+        }
+        else if (cnt == 3){
+            target_pose.position.x = 0.30;
+            target_pose.position.y = 0.60;
+            target_pose.position.z = 1.67;
+        }
+        else if (cnt == 4){
+            target_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(1.22, 0.5, -0.6);
+            target_pose.position.x = 0.37;
+            target_pose.position.y = 0.45;
+            target_pose.position.z = 1.50;
+        }
+        else if (cnt == 5){
+            
+            target_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(1.55, 0.0, 1.1);
+            target_pose.position.x = 0.30;
+            target_pose.position.y = 0.77;
+            target_pose.position.z = 1.67;
+        }
+        else if (cnt == 6){
+            target_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(1.3, 0.44, 1.04);
+            target_pose.position.x = 0.11;
+            target_pose.position.y = 1.0;
+            target_pose.position.z = 1.5;
+        }
+        else if (cnt == 7){
+            target_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(1.54, 0.0, 1.1);
+            target_pose.position.x = 0.0;
+            target_pose.position.y = 0.37;
+            target_pose.position.z = 1.67;
+        }
+        else if (cnt == 8){
+            target_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(1.8, -0.47, 0.607);
+            target_pose.position.x = -0.32;
+            target_pose.position.y = 0.0;
+            target_pose.position.z = 1.62;
+        }
+                else if (cnt == 9){
+
+            target_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(1.54, 0.0, 1.1);
+            target_pose.position.x = 0.20;
+            target_pose.position.y = 0.30;
+            target_pose.position.z = 1.67;;
+        }
+
+        else
+        {
+            m_should_receive_depth = false;
+            
+        }
+        
+
+        return target_pose;
+
+
+    }
+
+
+
 }
 
 int main( int argc, char** argv )
@@ -369,4 +723,8 @@ int main( int argc, char** argv )
     gpis_ros::GPMapper gpmapper( node_handle );
     ros::spin();
 
+    ROS_INFO_STREAM("Session Ended");
+
 }
+
+

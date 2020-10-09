@@ -19,6 +19,12 @@ find_package(catkin REQUIRED COMPONENTS
   message_filters
   depth_image_proc
   roslib
+
+  actionlib_msgs
+  geometry_msgs
+  actionlib
+  genmsg
+  tf_conversions
 )
 
 ## System dependencies
@@ -26,6 +32,19 @@ find_package(Boost REQUIRED COMPONENTS thread system program_options)
 find_package(Eigen3 REQUIRED)
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV REQUIRED)
+
+
+## Generate actions in the 'action' folder
+add_action_files(
+  FILES
+  MoveArm.action
+)
+
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  actionlib_msgs   geometry_msgs   std_msgs
+)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -47,6 +66,7 @@ catkin_package(
     roscpp rospy tf tf2 pcl_ros image_transport
         sensor_msgs  std_srvs  visualization_msgs
         image_geometry message_filters depth_image_proc roslib
+  CATKIN_DEPENDS actionlib_msgs geometry_msgs roscpp rospy 
         #  DEPENDS
 #        BOOST
 #        EIGEN3

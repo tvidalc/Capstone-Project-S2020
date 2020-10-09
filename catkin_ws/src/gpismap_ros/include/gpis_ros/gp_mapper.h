@@ -1,5 +1,7 @@
 //
-// Created by liyang on 1/13/20.
+// Created by liyang on 1/13/20
+//
+// Edited by Abdel Saeed 09/10/2020
 //
 
 #ifndef SRC_GP_MAPPER_H
@@ -17,6 +19,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
 #include <visualization_msgs/Marker.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <tf_conversions/tf_eigen.h>
 #include <tf/tf.h>
 #include <tf2_ros/transform_listener.h>
 #include <image_transport/image_transport.h>
@@ -24,6 +28,11 @@
 #include <std_srvs/Empty.h>
 #include <tf/transform_broadcaster.h>
 #include <std_msgs/String.h>
+#include <string>
+#include <actionlib/client/simple_action_client.h>
+#include <gpismap_ros/MoveArmAction.h>
+#include <geometry_msgs/Pose.h>
+
 
 
 namespace gpis_ros
@@ -59,14 +68,29 @@ namespace gpis_ros
 
         void publishMesh( const std_msgs::Header& header, const std::string& fname );
 
+        void publishPosition( pcl::PointXYZ point, int cnt);
+
+        //float getGradient (float var, float vtop, float vbottom, float vleft, float vright, float vfront, float vback);
+
+        void getarrayindex(int pos, int length, int &value1, int &value2, int &value3);
+        int getvectorindex(int i, int j, int k);
+        int getfacepos(int pos, int length, int face);
+        float getGradient(float var, float top, float bottom, float front, float back, float left, float right);
+        pcl::PointXYZ findMax(std::vector<float> util);
+        geometry_msgs::Pose getPose(int cnt);
+        
+
     private:
         ros::NodeHandle m_nh;
         ros::NodeHandle m_pnh;	
+        std::string command;
 
         image_transport::CameraSubscriber m_sub_depth;
         ros::Publisher m_mapPub;
         ros::Publisher m_pclPub, m_gpis_internal_pub;
         ros::Publisher m_pileMeshPub;
+        ros::Publisher m_position;
+        actionlib::SimpleActionClient<gpismap_ros::MoveArmAction> client_;
 
         std::string m_worldFrameId; // the map frame
         bool m_latchedTopics;
@@ -79,10 +103,6 @@ namespace gpis_ros
         image_geometry::PinholeCameraModel m_model;
 
         ros::ServiceServer m_trigger_svc;
-        //ros::ServiceServer m_console_svc;
-
-	//ros::Publisher m_pub;	
-	//ros::Subscriber m_sub;
 	
         tf2_ros::Buffer m_tf2Buffer;
         tf2_ros::TransformListener m_tf2Listener;
@@ -102,6 +122,16 @@ namespace gpis_ros
 
         visualization_msgs::Marker m_mesh_msg;
         std::string m_mesh_fbase;
+
+        pcl::PointCloud<pcl::PointXYZ>::Ptr m_cloud_filtered;
+        int Tp, Bt, Ft, Bk, Rt, Lt;
+
+        bool success;
+        bool finished_within_time;
+
+        gpismap_ros::MoveArmGoal goal;
+        geometry_msgs::Pose target_pose, target_pose1, target_pose2, target_pose3, target_pose4;
+
 
     };
 

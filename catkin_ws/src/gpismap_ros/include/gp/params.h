@@ -38,8 +38,8 @@
 
 /* GPisMap3 */
 #define GPISMAP3_RTIMES                     2.0
-#define GPISMAP3_TREE_CLUSTER_HALF_LENGTH   (0.05)
-#define GPISMAP3_TREE_MIN_HALF_LENGTH       (0.025)
+#define GPISMAP3_TREE_CLUSTER_HALF_LENGTH   (0.05/2)
+#define GPISMAP3_TREE_MIN_HALF_LENGTH       (0.025/4)  //0.025
 #define GPISMAP3_TREE_MAX_HALF_LENGTH       (3.2)
 #define GPISMAP3_TREE_INIT_ROOT_HALF_LENGTH (1.6)
 // Note: 1.6 = 0.0125*(2.0^7)
@@ -85,8 +85,8 @@
  */
 #define GPISMAP3_DELX           1e-3
 #define GPISMAP3_FBIAS          0.2
-#define GPISMAP3_OBS_SKIP       4
-#define GPISMAP3_OBS_VAR_THRE   0.08
+#define GPISMAP3_OBS_SKIP       12  //4
+#define GPISMAP3_OBS_VAR_THRE   1.6  //0.08
 #define GPISMAP3_MIN_POS_NOISE  1e-3
 #define GPISMAP3_MIN_GRAD_NOISE 1e-2
 #define GPISMAP3_MAP_SCALE      0.04

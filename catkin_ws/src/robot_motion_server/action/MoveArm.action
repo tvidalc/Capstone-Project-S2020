@@ -1,0 +1,14 @@
+#goal definition
+
+string command #RESET: move robot to preset pose , GTWP : go to specified waypoint pose
+
+geometry_msgs/Pose target_pose
+
+---
+
+#result definition
+
+---
+
+#feedback
+
