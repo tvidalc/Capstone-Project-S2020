@@ -12,7 +12,7 @@ Usage:
 
     $ roslaunch robotic_sensing system_start.launch
     
-2. Start robot server to send motion commands 
+2. Start robot server for sending motion commands 
 
     $ roslaunch robot_motion_server move_arm_server.launch
     
