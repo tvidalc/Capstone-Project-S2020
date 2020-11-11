@@ -1,0 +1,16 @@
+### Run Simulation with UR5
+```
+roslaunch ur_e_gazebo ur5e_joint_limited.launch 
+roslaunch ur5_e_moveit_config ur5_e_moveit_planning_execution.launch sim:=true limited:=true
+roslaunch ur5_e_moveit_config moveit_rviz.launch config:=true
+```
+
+### bringup robot motion server 
+```
+roslaunch robot_motion_server move_arm_server.launch
+```
+
+### bringup robot motion client
+```
+rosrun robot_motion_server robot_motion_client
+``` 

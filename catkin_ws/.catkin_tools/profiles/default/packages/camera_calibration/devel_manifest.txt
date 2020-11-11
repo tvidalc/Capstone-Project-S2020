@@ -1,0 +1,6 @@
+image_pipeline-kinetic/camera_calibration
+/home/abdel/catkin_ws/devel/.private/camera_calibration/cmake.lock /home/abdel/catkin_ws/devel/./cmake.lock
+/home/abdel/catkin_ws/devel/.private/camera_calibration/share/camera_calibration/cmake/camera_calibrationConfig-version.cmake /home/abdel/catkin_ws/devel/share/camera_calibration/cmake/camera_calibrationConfig-version.cmake
+/home/abdel/catkin_ws/devel/.private/camera_calibration/share/camera_calibration/cmake/camera_calibrationConfig.cmake /home/abdel/catkin_ws/devel/share/camera_calibration/cmake/camera_calibrationConfig.cmake
+/home/abdel/catkin_ws/devel/.private/camera_calibration/lib/python2.7/dist-packages/camera_calibration/__init__.py /home/abdel/catkin_ws/devel/lib/python2.7/dist-packages/camera_calibration/__init__.py
+/home/abdel/catkin_ws/devel/.private/camera_calibration/lib/pkgconfig/camera_calibration.pc /home/abdel/catkin_ws/devel/lib/pkgconfig/camera_calibration.pc

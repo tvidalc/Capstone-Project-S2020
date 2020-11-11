@@ -1,0 +1,2 @@
+gpismap_ros:robot_motion_server:robotic_sensing
+-DCATKIN_DEVEL_PREFIX=/home/abdel/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/abdel/catkin_ws/install -G Unix Makefiles

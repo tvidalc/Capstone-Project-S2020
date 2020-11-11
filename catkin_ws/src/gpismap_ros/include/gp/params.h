@@ -83,10 +83,10 @@
  *                - If var(prediction) > v_thre, then don't rely on the prediction.
  * obs_skip: use every 'skip'-th pixel
  */
-#define GPISMAP3_DELX           1e-3
+#define GPISMAP3_DELX           1e-3    // 1e-3
 #define GPISMAP3_FBIAS          0.2
-#define GPISMAP3_OBS_SKIP       12  //4
-#define GPISMAP3_OBS_VAR_THRE   1.6  //0.08
+#define GPISMAP3_OBS_SKIP       6  //4
+#define GPISMAP3_OBS_VAR_THRE   0.8  //0.08
 #define GPISMAP3_MIN_POS_NOISE  1e-3
 #define GPISMAP3_MIN_GRAD_NOISE 1e-2
 #define GPISMAP3_MAP_SCALE      0.04

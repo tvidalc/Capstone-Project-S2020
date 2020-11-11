@@ -1,0 +1,8 @@
+prefix=/home/abdel/catkin_ws/devel
+
+Name: robot_motion_server
+Description: Description of robot_motion_server
+Version: 0.0.0
+Cflags: -I/home/abdel/catkin_ws/devel/include
+Libs: -L${prefix}/lib 
+Requires: actionlib_msgs geometry_msgs roscpp rospy std_msgs

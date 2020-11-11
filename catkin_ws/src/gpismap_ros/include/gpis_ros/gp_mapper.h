@@ -33,10 +33,36 @@
 #include <gpismap_ros/MoveArmAction.h>
 #include <geometry_msgs/Pose.h>
 
+#include <iostream>
+#include <fstream>
 
+#include <algorithm>
+#include <bits/stdc++.h>
 
 namespace gpis_ros
 {
+
+    struct Point {
+    double x;     // coordinates
+    int cluster;     // no default cluster
+    double minDist;  // default infinite dist to nearest cluster
+
+    Point() :
+        x(0.0),
+        cluster(-1),
+        minDist(__DBL_MAX__) {}
+
+    Point(double x) :
+        x(x),
+        cluster(-1),
+        minDist(__DBL_MAX__) {}
+
+    double distance(Point p) {
+        return (p.x - x) * (p.x - x);
+    }
+};
+
+
 
     struct IsoInfo{
         int res[3] ;
@@ -72,13 +98,17 @@ namespace gpis_ros
 
         //float getGradient (float var, float vtop, float vbottom, float vleft, float vright, float vfront, float vback);
 
-        void getarrayindex(int pos, int length, int &value1, int &value2, int &value3);
-        int getvectorindex(int i, int j, int k);
-        int getfacepos(int pos, int length, int face);
+        void getArrayIndex(int pos, int length, int &value1, int &value2, int &value3);
+        int getVectorIndex(int i, int j, int k);
+        int getFacePos(int pos, int length, int face);
         float getGradient(float var, float top, float bottom, float front, float back, float left, float right);
         pcl::PointXYZ findMax(std::vector<float> util);
         geometry_msgs::Pose getPose(int cnt);
-        
+
+
+        int mode(int n, int arr[], int clus[], int sizeofpoints);
+        double kMeansClustering(std::vector<Point>* points, int epochs, int k, int sizeofpoints);
+
 
     private:
         ros::NodeHandle m_nh;
@@ -115,6 +145,7 @@ namespace gpis_ros
         std::vector<float> pRes;
         std::vector<float> xtest;
         std::vector<float> pose_ptr;
+        std::vector<float> transform_ptr;
 
         matlab::RangeInfo<float> x_range, y_range, z_range;
 
@@ -131,6 +162,14 @@ namespace gpis_ros
 
         gpismap_ros::MoveArmGoal goal;
         geometry_msgs::Pose target_pose, target_pose1, target_pose2, target_pose3, target_pose4;
+
+        std::ofstream myfile;
+        char filename[50];
+
+        bool check;
+
+        //std::vector<Point> pointskmeans;
+
 
 
     };

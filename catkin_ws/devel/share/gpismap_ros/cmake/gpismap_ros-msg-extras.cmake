@@ -1,0 +1,2 @@
+set(gpismap_ros_MESSAGE_FILES "/home/abdel/catkin_ws/devel/share/gpismap_ros/msg/MoveArmAction.msg;/home/abdel/catkin_ws/devel/share/gpismap_ros/msg/MoveArmActionGoal.msg;/home/abdel/catkin_ws/devel/share/gpismap_ros/msg/MoveArmActionResult.msg;/home/abdel/catkin_ws/devel/share/gpismap_ros/msg/MoveArmActionFeedback.msg;/home/abdel/catkin_ws/devel/share/gpismap_ros/msg/MoveArmGoal.msg;/home/abdel/catkin_ws/devel/share/gpismap_ros/msg/MoveArmResult.msg;/home/abdel/catkin_ws/devel/share/gpismap_ros/msg/MoveArmFeedback.msg")
+set(gpismap_ros_SERVICE_FILES "")

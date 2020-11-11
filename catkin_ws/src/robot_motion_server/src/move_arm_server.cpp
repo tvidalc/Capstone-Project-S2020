@@ -284,7 +284,7 @@ public:
         else if (goal_->command == "GTP"){
 
         move_group.setPoseTarget(target_pose);
-        bool success = (move_group.plan(my_plan_) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+        bool success = true; //(move_group.plan(my_plan_) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
 
         move_group.setStartStateToCurrentState();
         move_group.setPlanningTime(PLANNING_TIME);

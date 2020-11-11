@@ -1,0 +1,8 @@
+prefix=/home/abdel/catkin_ws/devel
+
+Name: robotic_sensing
+Description: Description of robotic_sensing
+Version: 0.0.0
+Cflags: -I/home/abdel/catkin_ws/src/robotic_sensing/include
+Libs: -L${prefix}/lib 
+Requires: roscpp std_msgs

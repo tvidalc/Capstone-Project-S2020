@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_filters
   depth_image_proc
   roslib
+  cv_bridge
 
   actionlib_msgs
   geometry_msgs
@@ -67,16 +68,16 @@ catkin_package(
         sensor_msgs  std_srvs  visualization_msgs
         image_geometry message_filters depth_image_proc roslib
   CATKIN_DEPENDS actionlib_msgs geometry_msgs roscpp rospy 
-        #  DEPENDS
+         DEPENDS
 #        BOOST
 #        EIGEN3
-#        OpenCV
+         OpenCV
 
 )
 
 ###########
 ## Build ##
-###########
+########### 
 
 #message("Boost_INCLUDE_DIRS is ${Boost_INCLUDE_DIRS}")
 
