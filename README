@@ -16,7 +16,8 @@ Usage:
 
     $ roslaunch robot_motion_server move_arm_server.launch
     
-3. Initialise GPIS algorithm with commandline arguments stating mode of scan. auto option performs scans autonomously using gaussian noise, panel option does a single scan from top view, and object option performs scanning using predetermined ideal poses
+3. Initialise GPIS algorithm with commandline arguments stating mode of scan. auto option performs scans autonomously using gaussian noise, 
+panel option does a single scan from top view, and object option performs scanning using predetermined ideal poses
 
     $ rosrun gpismap_ros gpismap3 _command:=auto   or   rosrun gpismap_ros gpismap3 _command:=panel   or   rosrun gpismap_ros gpismap3 _command:=object
     
@@ -26,7 +27,8 @@ Usage:
     
 5. Allow system to run and auto terminate else for any issues hit ctrl-z on relevant terminals to cancel processes
     
-    results can be viewed from the /mesh sub directory of gpismap_ros package or alternatively by subscribing to the pointcloud and gp_mesh topic in rviz during scanning
+    results can be viewed from the /mesh sub directory of gpismap_ros package or alternatively by subscribing to the pointcloud and gp_mesh topic in rviz 
+    during scanning
     
 
 Note: All commands must be entered in a new terminal 
